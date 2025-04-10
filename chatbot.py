@@ -10,6 +10,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 import requests
 from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 load_dotenv()
 
@@ -20,6 +22,7 @@ os.environ["no_proxy"] = "localhost,127.0.0.1,::1,.openai.azure.com"
 VECTORDB_PATH = "local_db"
 DATA_FOLDER = "data"
 HF_TOKEN=os.environ.get("HF_TOKEN")
+chat_history = InMemoryChatMessageHistory()
 
 PROMPT_TEMPLATE = """
     You are a highly knowledgeable and helpful assistant specializing in TDX (Trust Domain Extensions). 
@@ -140,14 +143,28 @@ def load_llm():
     )
     return llm
 
+def get_memory(_):
+    return chat_history
+
 def query_chatbot(prompt, vector_store):
+
     qa_chain = RetrievalQA.from_chain_type(
         llm=load_llm(),
         chain_type="stuff",
-        retriever=vector_store.as_retriever(search_kwargs={'k': 2}),
+        retriever=vector_store.as_retriever(search_type="similarity", search_kwargs={'k': 3}),
         return_source_documents=False,
         chain_type_kwargs={'prompt': custom_prompt(PROMPT_TEMPLATE)}
     )
 
-    response = qa_chain.invoke({'query': prompt})
+    qa_chain_with_history = RunnableWithMessageHistory(
+        qa_chain,
+        get_memory,
+        input_messages_key="query",
+        history_messages_key="chat_history"
+    )
+
+    response = qa_chain_with_history.invoke(
+        {'query': prompt},
+        config={"configurable": {"session_id": "rag-memory"}})
+
     return response['result']

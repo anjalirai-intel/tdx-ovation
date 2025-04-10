@@ -1,25 +1,11 @@
-import asyncio
 import traceback
 import sqlite3
 import os
 import streamlit as st
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS, Chroma
+from langchain_community.vectorstores import FAISS
 import chatbot
 from dotenv import load_dotenv
 from langchain_openai import AzureOpenAIEmbeddings
-
-try:
-    asyncio.get_event_loop()
-except RuntimeError:
-    asyncio.set_event_loop(asyncio.new_event_loop())
-
-try:
-    import fiximports
-except ImportError:
-    pass
-
-
 
 VECTORDB_PATH = "local_db"
 
