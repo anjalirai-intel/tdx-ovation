@@ -113,7 +113,7 @@ def create_vector_store(text_chunks):
         api_key=os.environ["AZURE_OPENAI_KEY"],
         azure_endpoint=os.environ["AZURE_OPENAI_URL"],
         api_version=os.environ["OPENAI_EMBEDDING_VERSION"],
-        chunk_size=500
+        chunk_size=1000
     )
     vector_db = FAISS.from_documents(text_chunks, embeddings)
     vector_db.save_local(VECTORDB_PATH)

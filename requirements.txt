@@ -11,3 +11,4 @@ python-docx
 beautifulsoup4
 torch
 langchain-openai
+langchain-core
