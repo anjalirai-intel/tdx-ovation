@@ -1,9 +1,13 @@
 langchain
 streamlit
+faiss-cpu
 sentence-transformers
 langchain-community
 pypdf
-faiss-cpu
 langchain-huggingface
 dotenv
-nest-asyncio
+asyncio
+python-docx
+beautifulsoup4
+torch
+langchain-openai
