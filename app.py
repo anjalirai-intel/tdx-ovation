@@ -83,10 +83,14 @@ def main():
             st.session_state.messages = []
 
     # Delete conversation
-    conversation_to_delete = st.sidebar.selectbox("Select Conversation to Delete", [None] + [row[0] for row in c.execute('SELECT topic FROM conversations').fetchall()])
+    conversation_to_delete = st.sidebar.selectbox(
+        "Select Conversation to Delete",
+        [None] + [row[0] for row in c.execute('SELECT topic FROM conversations').fetchall()])
+
     if st.sidebar.button("Delete Selected Conversation"):
         if conversation_to_delete:
-            conversation_id_to_delete = c.execute('SELECT id FROM conversations WHERE topic = ?', (conversation_to_delete,)).fetchone()[0]
+            conversation_id_to_delete = c.execute(
+                'SELECT id FROM conversations WHERE topic = ?', (conversation_to_delete,)).fetchone()[0]
             delete_conversation(conversation_id_to_delete)
 
     # Display past conversations
@@ -94,14 +98,15 @@ def main():
     st.sidebar.write("Common TDX FAQ's")
     past_conversations = c.execute('SELECT id, topic, timestamp FROM conversations ORDER BY timestamp DESC').fetchall()
     for conversation_id, topic, timestamp in past_conversations:
-        #st.sidebar.write(f"**{timestamp}**")
-        #st.sidebar.write(f"**Topic:** {topic}")
-        #st.sidebar.write("---")
-
         if st.sidebar.button(f"{topic}", key=f"load_{conversation_id}"):
             st.session_state.conversation_id = conversation_id
             st.session_state.topic = topic
-            st.session_state.messages = c.execute('SELECT sender, message FROM messages WHERE conversation_id = ? ORDER BY timestamp', (conversation_id,)).fetchall()
+            st.session_state.messages = [
+                {'role': row[0], 'content': row[1]}
+                for row in c.execute(
+                'SELECT sender, message FROM messages WHERE conversation_id = ? ORDER BY timestamp',
+                (conversation_id,)).fetchall()
+            ]
 
     # Main chat area
     if 'conversation_id' not in st.session_state:
@@ -111,6 +116,10 @@ def main():
 
     if st.session_state.conversation_id:
         st.header(f"Topic: {st.session_state.topic}")
+
+        for msg in st.session_state.messages:
+            st.chat_message(msg['role'].lower()).markdown(msg['content'])
+
         prompt = st.chat_input("Please enter your query")
 
         if prompt:
@@ -118,25 +127,19 @@ def main():
                 st.error("Query cannot be empty. Please enter a valid query.")
                 return
 
-            #st.chat_message('user').markdown(prompt)
-            #st.session_state.messages.append({'role': 'user', 'content': prompt})
+            st.chat_message('user').markdown(prompt)
+            st.session_state.messages.append({'role': 'user', 'content': prompt})
+            save_message(st.session_state.conversation_id, "User", prompt)
 
             try:
                 result = chatbot.query_chatbot(prompt, vector_store)
-                #st.chat_message('assistant').markdown(result)
-                #st.session_state.messages.append({'role':'assistant', 'content': result})
-                save_message(st.session_state.conversation_id, "User", prompt)
+                st.chat_message('assistant').markdown(result)
+                st.session_state.messages.append({'role': 'assistant', 'content': result})
                 save_message(st.session_state.conversation_id, "assistant", result)
-                st.session_state.messages.append(("User", prompt))
-                st.session_state.messages.append(("assistant", result))
             except Exception as e:
                 st.error(f"Error: {str(e)}")
                 st.error(traceback.format_exc())
 
-        for sender, message in st.session_state.messages:
-            st.chat_message(sender).markdown(message)
-            #st.write(f"**{sender}:** {message}")
-            #st.write("---")
     else:
         st.header("Start a new conversation or select an existing one from the sidebar.")
 

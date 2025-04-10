@@ -26,13 +26,14 @@ chat_history = InMemoryChatMessageHistory()
 
 PROMPT_TEMPLATE = """
     You are a highly knowledgeable and helpful assistant specializing in TDX (Trust Domain Extensions). 
-    Your goal is to provide clear, concise, and accurate answers to user queries related to TDX. 
+    Your goal is to provide detailed, clear and accurate answers to user queries related to TDX.
 
     Guidelines:
     1. Always base your answers on the provided context. If the context does not contain enough information, 
     respond with "I am not aware of this. Please send an email to the respective person for further support."
     2. Avoid making assumptions or providing incorrect information.
     3. Keep your responses professional and to the point.
+    4. Before saying I am not aware of this, be sure that it actually does not exist.
 
     Context: {context}
     Question: {question}
@@ -139,7 +140,7 @@ def load_llm():
         api_version=os.environ["OPENAI_CHAT_VERSION"],
         api_key=os.environ["AZURE_OPENAI_KEY"],
         azure_endpoint=os.environ["AZURE_OPENAI_URL"],
-        temperature=0.2,
+        temperature=0.7,
     )
     return llm
 
