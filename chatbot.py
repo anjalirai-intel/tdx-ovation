@@ -90,17 +90,16 @@ def read_files():
             elif file_extension == ".txt":
                 documents.append(Document(page_content=read_txt_file(file_path), metadata={"source": file_path}))
 
-
-    # # Read html url from csv file
-    # with open(os.path.join(DATA_FOLDER, "html_links.csv")) as csv_file:
-    #     for url in csv_file:
-    #         if "github.com" in url:
-    #             url = url.replace("github.com", "raw.githubusercontent.com")
-    #         if "/blob/" in url:
-    #             url = url.replace("/blob/", "/")
-    #         documents.append(Document(page_content=read_html_file(html_url=url.strip()), metadata={"source": url}))
+    # Read html url from csv file
+    with open(os.path.join(DATA_FOLDER, "html_links.csv"), encoding="utf-8-sig") as csv_file:
+        for url in csv_file:
+            if "github.com" in url:
+                url = url.replace("github.com", "raw.githubusercontent.com")
+            if "/blob/" in url:
+                url = url.replace("/blob/", "/")
+            documents.append(Document(page_content=read_html_file(html_url=url.strip()), metadata={"source": url}))
     
-    # return documents
+    return documents
 
 def create_chunks(extracted_data):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
@@ -137,7 +136,7 @@ def load_llm():
         api_version=os.environ["OPENAI_CHAT_VERSION"],
         api_key=os.environ["AZURE_OPENAI_KEY"],
         azure_endpoint=os.environ["AZURE_OPENAI_URL"],
-        temperature=0,
+        temperature=0.2,
     )
     return llm
 
@@ -145,7 +144,7 @@ def query_chatbot(prompt, vector_store):
     qa_chain = RetrievalQA.from_chain_type(
         llm=load_llm(),
         chain_type="stuff",
-        retriever=vector_store.as_retriever(search_kwargs={'k': 5}),
+        retriever=vector_store.as_retriever(search_kwargs={'k': 2}),
         return_source_documents=False,
         chain_type_kwargs={'prompt': custom_prompt(PROMPT_TEMPLATE)}
     )

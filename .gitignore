@@ -1,0 +1,8 @@
+*local_db
+.cache
+.vscode
+venv
+__pycache__
+.env
+test.py
+data
