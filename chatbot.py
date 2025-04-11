@@ -26,7 +26,7 @@ chat_history = InMemoryChatMessageHistory()
 
 PROMPT_TEMPLATE = """
     You are a highly knowledgeable and helpful assistant specializing in TDX (Trust Domain Extensions). 
-    Your goal is to provide detailed, clear and accurate answers to user queries related to TDX.
+    Your goal is to provide detailed and accurate answers to user queries related to TDX.
 
     Guidelines:
     1. Always base your answers on the provided context. If the context does not contain enough information, 

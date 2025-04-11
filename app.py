@@ -6,6 +6,8 @@ from langchain_community.vectorstores import FAISS
 import chatbot
 from dotenv import load_dotenv
 from langchain_openai import AzureOpenAIEmbeddings
+import smtplib, ssl
+from email.message import EmailMessage
 
 VECTORDB_PATH = "local_db"
 
@@ -69,6 +71,26 @@ def delete_conversation(conversation_id):
     c.execute('DELETE FROM conversations WHERE id = ?', (conversation_id,))
     conn.commit()
 
+def send_email(conversation_id, topic, customer_email):
+    subject = "Streamlit Conversation"
+    st.write(conversation_id, topic, customer_email)
+    body = "\n".join(f"{row[0], row[1]} \n" for row in c.execute(
+            'SELECT sender, message FROM messages WHERE conversation_id = ? ORDER BY timestamp',
+            (st.session_state.conversation_id,)).fetchall())
+    st.write(body)
+    # Email sender and receiver
+    customer_email = "sender@gmail.com"  # Replace with your email address
+    sender_password = ""  # Replace with your password or app password
+    receiver_email = "receiver@gmail.com"  # Replace with recipient's email
+
+    # Create a secure SMTP connection
+    #context = ssl.create_default_context()
+    #with smtplib.SMTP("smtp.gmail.com", 587) as server:
+    #    server.login(sender_email, sender_password)
+    #    server.sendmail(sender_email, receiver_email, body)
+
+    st.success("Conversation sent via email!")
+    body = ""
 
 def main():
     st.title("TDX Chatbot")
@@ -139,7 +161,31 @@ def main():
             except Exception as e:
                 st.error(f"Error: {str(e)}")
                 st.error(traceback.format_exc())
+        
+        st.sidebar.write("---")
+        st.sidebar.write("Need further help, please reach out to our support team")
+        if st.sidebar.button("Send Conversation via Email"):    
+            customer_email = st.text_input("Please enter your e-mail address")
+            if customer_email:
+                st.write("You entered: ", customer_email)
+                st.write(st.session_state.conversation_id, st.session_state.topic)
+                body = "\n".join(f"{row[0], row[1]} \n" for row in c.execute(
+                        'SELECT sender, message FROM messages WHERE conversation_id = ? ORDER BY timestamp',
+                        (st.session_state.conversation_id,)).fetchall())
+                st.write(body)
+                # Email sender and receiver
+                customer_email = "sender@gmail.com"  # Replace with your email address
+                sender_password = ""  # Replace with your password or app password
+                receiver_email = "receiver@gmail.com"  # Replace with recipient's email
 
+                # Create a secure SMTP connection
+                #context = ssl.create_default_context()
+                #with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                #    server.login(sender_email, sender_password)
+                #    server.sendmail(sender_email, receiver_email, body)
+
+                st.success("Conversation sent via email!")
+                body = ""
     else:
         st.header("Start a new conversation or select an existing one from the sidebar.")
 
