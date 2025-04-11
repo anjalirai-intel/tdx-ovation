@@ -11,6 +11,12 @@ from email.message import EmailMessage
 from PIL import Image
 import base64
 
+st.set_page_config(
+    page_title="TDX Customer Chatbot",
+    layout="wide",
+    page_icon=":desktop_computer:"
+)
+
 VECTORDB_PATH = "local_db"
 # LOGO
 icon_path = "icon.ico"
@@ -100,11 +106,11 @@ def send_email(conversation_id, topic, customer_email):
     body = ""
 
 def main():
-    st.set_page_config(
-    page_title="TDX Customer Chatbot",
-    layout="wide",
-    page_icon=ICON,
-    )
+    # st.set_page_config(
+    # page_title="TDX Customer Chatbot",
+    # layout="wide",
+    # page_icon=ICON,
+    # )
     st.header("TDX Customer Chatbot :desktop_computer:", divider="rainbow")
 
     # Start new conversation

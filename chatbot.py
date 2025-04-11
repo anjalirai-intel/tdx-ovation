@@ -140,7 +140,7 @@ def load_llm():
         api_version=os.environ["OPENAI_CHAT_VERSION"],
         api_key=os.environ["AZURE_OPENAI_KEY"],
         azure_endpoint=os.environ["AZURE_OPENAI_URL"],
-        temperature=0.7,
+        temperature=0.8,
     )
     return llm
 
